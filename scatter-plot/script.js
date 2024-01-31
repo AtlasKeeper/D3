@@ -45,6 +45,94 @@ d3.json(url)
     });
 
     x.domain([
-        d3.min(data)
-    ])
+        d3.min(data, function (d) {
+          return d.year - 1;
+        }),
+        d3.max(data, function (d) {
+          return d.year + 1;
+        })
+    ]);
+    y.domain(
+      d3.extent(data, function (d) {
+        return d.time;
+      })
+    );
+
+    svg
+      .append('g')
+      .attr('class', 'x-axis')
+      .attr('id', 'x-axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(xAxis)
+      .append('text')
+      .attr('class', 'x-axis-label')
+      .attr('x', width)
+      .attr('y', -6)
+      .style('text-anchor', 'end')
+      .text('Year');
+
+    svg 
+      .append('g')
+      .attr('class', 'y axis')
+      .attr('id', 'y-axis')
+      .attr(yAxis)
+      .append('text')
+      .attr('class', 'label')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', 6)
+      .attr('dy', '.71em')
+      .style('text-anchor', 'end')
+      .text('Best Time (minute)');
+
+    svg
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -160)
+      .attr('y', -44)
+      .style('font-size', 18)
+      .text('Time in Minute');
+
+    svg
+      .selectAll('.dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('class', 'dot')
+      .attr('r', 6)
+      .attr('cx', function (d) {
+        return x(d.Year);
+      })
+      .attr('cy', function (d) {
+        return y(d.Time);
+      })
+      .attr('data-xvalue', function (d) {
+        return d.Year;
+      })
+      .attr('data-yvalue', function (d) {
+        return d.Time.toISOString();
+      })
+      .style('fill', fucntion (d) {
+        return color(d.Doping !== '');
+      })
+      .on('mouseover', function (event, d) {
+        div.style('opacity', 0.9);
+        div.attr('data-year', d.year);
+        div
+          .html(
+            d.Name +
+              ': ' +
+              d.Nationality +
+              '<br/>' +
+              'Year: ' +
+              d.Year +
+              ', Time: ' +
+              timeFormat(d.Time) +
+              (d.Doping ? '<br/><br/>' + d.Doping : '')
+          )
+          .style('left', event.pageX + 'px')
+          .style('top', event.pageY - 28 + 'px');
+      })
+      .on('mouseout', function () {
+        div.style('opacity', 0);
+      });
   })
